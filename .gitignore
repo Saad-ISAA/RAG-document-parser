@@ -1,0 +1,38 @@
+.venv
+*/__*
+results*.json
+# Ignore Python cache files
+__pycache__/
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# Ignore Python bytecode files
+*.py[cod]
+# Ignore virtual environment directories
+*.egg-info/
+# Ignore distribution files
+dist/
+# Ignore build directories
+build/
+# Ignore coverage reports
+.coverage
+# Ignore logs
+*.log
+# Ignore environment files
+.env
+# Ignore test input output files
+test_output/
+test_input/
+# Ignore IDE specific files
+.idea/
+# Ignore macOS specific files
+.DS_Store
+# Ignore Windows specific files
+Thumbs.db
+# Ignore temporary files
+*.tmp
+# Ignore backup files
+*.bak
+# Ignore Python wheel files
+*.whl
+# Ignore package manager files
+node_modules/

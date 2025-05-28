@@ -1,0 +1,53 @@
+# Universal Document Parser - Requirements
+# Core dependencies for high-performance document parsing
+
+# File type detection
+python-magic>=0.4.27
+python-magic-bin>=0.4.14; sys_platform == "win32"
+
+# PDF processing (install at least one)
+pdfplumber>=0.10.3              # Best for tables and structured content
+PyMuPDF>=1.23.8                 # Fast, handles images well
+pypdf>=3.17.0                   # Lightweight fallback
+
+# Document processing
+python-docx>=1.1.0              # DOCX files
+odfpy>=1.4.1                    # ODT files
+striprtf>=0.0.26                # RTF files
+
+# Spreadsheet processing
+pandas>=2.1.4                   # Excel and CSV (recommended)
+openpyxl>=3.1.2                 # XLSX files (alternative)
+xlrd>=2.0.1                     # XLS files (legacy)
+
+# Image processing
+Pillow>=10.1.0                  # Image handling
+numpy>=1.24.3                   # Array processing
+
+# OCR engines (install at least one if OCR needed)
+easyocr>=1.7.0                  # Multi-language OCR (recommended)
+pytesseract>=0.3.10             # Tesseract wrapper
+opencv-python>=4.8.0            # Image preprocessing (optional)
+
+# Text processing
+beautifulsoup4>=4.12.2          # HTML parsing
+lxml>=4.9.3                     # XML processing
+markdown>=3.5.1                 # Markdown conversion
+
+# Encoding detection
+chardet>=5.2.0                  # Character encoding detection
+
+# Performance and utilities
+tqdm>=4.66.1                    # Progress bars
+psutil>=5.9.6                   # System monitoring
+
+# Development and testing (optional)
+pytest>=7.4.3
+black>=23.11.0
+flake8>=6.1.0
+mypy>=1.7.1
+
+# Additional format support (optional)
+# mammoth>=1.6.0                # DOC files (better than basic parsing)
+# python-pptx>=0.6.22           # PowerPoint files
+# python-magic-bin>=0.4.14      # For Windows users
