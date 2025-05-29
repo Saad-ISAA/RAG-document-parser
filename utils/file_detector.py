@@ -1,6 +1,6 @@
 # utils/file_detector.py
 """
-File type detection utilities for the Universal Document Parser.
+File type detection utilities for the Universal Document Parser - Enhanced Edition.
 """
 
 import mimetypes
@@ -25,9 +25,10 @@ class FileTypeDetector:
     """
     Detects file types and categorizes them for appropriate parser selection.
     Uses python-magic when available, falls back to extension-based detection.
+    Enhanced for Regional requirements with PowerPoint and comprehensive format support.
     """
     
-    # File type mappings
+    # File type mappings - Enhanced for Regional requirements
     MIME_TO_CATEGORY = {
         # PDF files
         'application/pdf': 'pdf',
@@ -38,6 +39,11 @@ class FileTypeDetector:
         'application/vnd.oasis.opendocument.text': 'document',  # .odt
         'application/rtf': 'document',  # .rtf
         'text/rtf': 'document',  # .rtf
+        
+        # Presentation files - NEW
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'powerpoint',  # .pptx
+        'application/vnd.ms-powerpoint': 'powerpoint',  # .ppt
+        'application/vnd.oasis.opendocument.presentation': 'powerpoint',  # .odp
         
         # Spreadsheet files
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'spreadsheet',  # .xlsx
@@ -75,11 +81,18 @@ class FileTypeDetector:
         '.odt': 'document',
         '.rtf': 'document',
         
+        # Presentations - NEW
+        '.pptx': 'powerpoint',
+        '.ppt': 'powerpoint',
+        '.odp': 'powerpoint',
+        '.key': 'powerpoint',  # Apple Keynote
+        
         # Spreadsheets
         '.xlsx': 'spreadsheet',
         '.xls': 'spreadsheet',
         '.ods': 'spreadsheet',
         '.csv': 'spreadsheet',
+        '.numbers': 'spreadsheet',  # Apple Numbers
         
         # Text files
         '.txt': 'text',
@@ -113,6 +126,11 @@ class FileTypeDetector:
         '.tif': 'image',
         '.webp': 'image',
         '.svg': 'image',
+        
+        # Additional formats that may need conversion
+        '.pages': 'document',  # Apple Pages
+        '.wpd': 'document',    # WordPerfect
+        '.wps': 'document',    # Microsoft Works
     }
     
     def __init__(self):
@@ -223,6 +241,8 @@ class FileTypeDetector:
             return 'document'
         elif any(word in mime_type.lower() for word in ['excel', 'spreadsheet', 'sheet']):
             return 'spreadsheet'
+        elif any(word in mime_type.lower() for word in ['powerpoint', 'presentation']):
+            return 'powerpoint'
         
         return 'unknown'
     
@@ -253,7 +273,7 @@ class FileTypeDetector:
             },
             'document': {
                 'description': 'Word processing documents',
-                'extensions': ['.docx', '.doc', '.odt', '.rtf'],
+                'extensions': ['.docx', '.doc', '.odt', '.rtf', '.pages', '.wpd', '.wps'],
                 'mime_types': [
                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                     'application/msword',
@@ -261,9 +281,18 @@ class FileTypeDetector:
                     'application/rtf'
                 ]
             },
+            'powerpoint': {  # NEW
+                'description': 'Presentation files',
+                'extensions': ['.pptx', '.ppt', '.odp', '.key'],
+                'mime_types': [
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.oasis.opendocument.presentation'
+                ]
+            },
             'spreadsheet': {
                 'description': 'Spreadsheet and tabular data files',
-                'extensions': ['.xlsx', '.xls', '.ods', '.csv'],
+                'extensions': ['.xlsx', '.xls', '.ods', '.csv', '.numbers'],
                 'mime_types': [
                     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     'application/vnd.ms-excel',
@@ -277,7 +306,7 @@ class FileTypeDetector:
                 'mime_types': ['text/plain', 'text/html', 'text/xml', 'application/json']
             },
             'image': {
-                'description': 'Image files (with OCR support)',
+                'description': 'Image files (with OCR support for Arabic/English)',
                 'extensions': ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'],
                 'mime_types': ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']
             }

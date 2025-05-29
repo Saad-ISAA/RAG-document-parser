@@ -1,6 +1,6 @@
 # utils/config.py
 """
-Configuration management for the Universal Document Parser.
+Configuration management for the Universal Document Parser - Enhanced Edition.
 """
 
 import os
@@ -38,23 +38,34 @@ class PDFConfig:
 
 @dataclass
 class OCRConfig:
-    """Configuration for OCR processing."""
+    """Configuration for OCR processing with enhanced Arabic support."""
     enabled: bool = False
     languages: List[str] = None
     engine: str = "easyocr"  # "easyocr", "tesseract", "paddleocr"
-    confidence_threshold: float = 0.3  # Lowered from 0.5 to catch more text
+    confidence_threshold: float = 0.3  # Lowered to catch more text
     preprocessing: bool = True
     
+    # Arabic-specific settings
+    arabic_support: bool = True
+    rtl_support: bool = True  # Right-to-left text support
+    mixed_language_detection: bool = True  # Detect mixed Arabic/English
+    
     # Tesseract specific
-    tesseract_config: str = "--psm 6"
+    tesseract_config: str = "--psm 6 -c preserve_interword_spaces=1"
     tesseract_path: Optional[str] = None
     
     # EasyOCR specific
     easyocr_gpu: bool = False
+    easyocr_paragraph: bool = False  # Better for Arabic text blocks
     
     def __post_init__(self):
         if self.languages is None:
+            # optimized language set
             self.languages = ["en", "ar"]  # English and Arabic by default
+        
+        # Ensure Arabic is included if arabic_support is True
+        if self.arabic_support and "ar" not in self.languages:
+            self.languages.append("ar")
 
 
 @dataclass
@@ -74,11 +85,23 @@ class ImageConfig:
 
 @dataclass
 class DocumentConfig:
-    """Configuration for document processing (DOCX, etc.)."""
+    """Configuration for document processing (DOCX, DOC, etc.)."""
     extract_tables: bool = True
     extract_images: bool = True
     preserve_formatting: bool = False
     include_headers_footers: bool = True
+    enhanced_doc_parsing: bool = True  # Use advanced DOC parsing methods
+    enable_conversion_fallback: bool = True  # Convert unsupported formats
+
+
+@dataclass
+class PowerPointConfig:
+    """Configuration for PowerPoint processing."""
+    extract_tables: bool = True
+    extract_images: bool = True
+    extract_slide_notes: bool = True
+    ocr_on_images: bool = True
+    max_slides: int = 500  # Safety limit
 
 
 @dataclass
@@ -89,6 +112,16 @@ class SpreadsheetConfig:
     read_all_sheets: bool = False
     skip_empty_rows: bool = True
     skip_empty_columns: bool = True
+
+
+@dataclass
+class ConverterConfig:
+    """Configuration for document conversion."""
+    enable_online: bool = False  # Enable online conversion services
+    libreoffice_timeout: int = 60  # Timeout in seconds
+    prefer_local_conversion: bool = True
+    cleanup_temp_files: bool = True
+    max_file_size_mb: int = 100  # Max file size for conversion
 
 
 @dataclass
@@ -117,17 +150,24 @@ class ParserConfig:
     ocr: OCRConfig = None
     image: ImageConfig = None
     document: DocumentConfig = None
+    powerpoint: PowerPointConfig = None  # New PowerPoint support
     spreadsheet: SpreadsheetConfig = None
     performance: PerformanceConfig = None
+    converter: ConverterConfig = None  # New conversion support
     
     # Global settings
-    enable_ocr: bool = False
+    enable_ocr: bool = True  # Default to True for Arabic requirements
     parallel_processing: bool = True
     max_workers: int = 4
     verbose_logging: bool = False
     
+    # Arabic-specific settings
+    arabic_support: bool = True  # Enhanced Arabic text processing
+    mixed_language_support: bool = True  # Arabic/English mixed content
+    comprehensive_parsing: bool = True  # Try everything approach
+    
     # File filtering
-    max_file_size: int = 100 * 1024 * 1024  # 100MB
+    max_file_size: int = 200 * 1024 * 1024  # Increased to 200MB for presentations
     allowed_extensions: List[str] = None
     blocked_extensions: List[str] = None
     
@@ -141,14 +181,18 @@ class ParserConfig:
         if self.pdf is None:
             self.pdf = PDFConfig()
         if self.ocr is None:
-            self.ocr = OCRConfig(enabled=self.enable_ocr)
+            self.ocr = OCRConfig(enabled=self.enable_ocr, arabic_support=self.arabic_support)
         else:
             # Update OCR enabled status if main config changed
             self.ocr.enabled = self.enable_ocr
+            if self.arabic_support:
+                self.ocr.arabic_support = True
         if self.image is None:
             self.image = ImageConfig()
         if self.document is None:
             self.document = DocumentConfig()
+        if self.powerpoint is None:
+            self.powerpoint = PowerPointConfig()  # New PowerPoint config
         if self.spreadsheet is None:
             self.spreadsheet = SpreadsheetConfig()
         if self.performance is None:
@@ -156,27 +200,32 @@ class ParserConfig:
                 parallel_processing=self.parallel_processing,
                 max_workers=self.max_workers
             )
+        if self.converter is None:
+            self.converter = ConverterConfig()  # New converter config
         
-        # Set default allowed extensions
+        # Set default allowed extensions - expanded for enhanced requirements
         if self.allowed_extensions is None:
             self.allowed_extensions = [
                 # PDF
                 "pdf",
                 # Documents
                 "docx", "doc", "odt", "rtf",
+                # Presentations - NEW
+                "pptx", "ppt", "odp",
                 # Spreadsheets
                 "xlsx", "xls", "ods", "csv",
                 # Text
-                "txt", "md", "html", "htm", "xml",
+                "txt", "md", "html", "htm", "xml", "json",
                 # Images
                 "jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif", "webp",
-                # Archives (if needed)
-                # "zip", "tar", "gz"
+                # Additional formats that can be converted
+                "pages", "key", "numbers",  # Apple formats
+                "wpd", "wps"  # WordPerfect and Works
             ]
         
         if self.blocked_extensions is None:
             self.blocked_extensions = [
-                "exe", "dll", "so", "dylib", "bin", "dat"
+                "exe", "dll", "so", "dylib", "bin", "dat", "tmp", "log"
             ]
     
     @classmethod
@@ -188,7 +237,7 @@ class ParserConfig:
         for key, value in config_dict.items():
             if hasattr(config, key) and not key.startswith('_'):
                 # Handle nested configurations
-                if key in ['pdf', 'ocr', 'image', 'document', 'spreadsheet', 'performance']:
+                if key in ['pdf', 'ocr', 'image', 'document', 'powerpoint', 'spreadsheet', 'performance', 'converter']:
                     if isinstance(value, dict):
                         current_config = getattr(config, key)
                         for sub_key, sub_value in value.items():
@@ -223,6 +272,7 @@ class ParserConfig:
             'PARSER_MAX_WORKERS': ('max_workers', int),
             'PARSER_MAX_FILE_SIZE': ('max_file_size', int),
             'PARSER_VERBOSE': ('verbose_logging', bool),
+            'PARSER_ARABIC_SUPPORT': ('arabic_support', bool),
             'OCR_LANGUAGES': ('ocr.languages', list),
             'OCR_ENGINE': ('ocr.engine', str),
             'PDF_EXTRACT_TABLES': ('pdf.extract_tables', bool),
@@ -256,12 +306,17 @@ class ParserConfig:
             'ocr': asdict(self.ocr),
             'image': asdict(self.image),
             'document': asdict(self.document),
+            'powerpoint': asdict(self.powerpoint),
             'spreadsheet': asdict(self.spreadsheet),
             'performance': asdict(self.performance),
+            'converter': asdict(self.converter),
             'enable_ocr': self.enable_ocr,
             'parallel_processing': self.parallel_processing,
             'max_workers': self.max_workers,
             'verbose_logging': self.verbose_logging,
+            'arabic_support': self.arabic_support,
+            'mixed_language_support': self.mixed_language_support,
+            'comprehensive_parsing': self.comprehensive_parsing,
             'max_file_size': self.max_file_size,
             'allowed_extensions': self.allowed_extensions,
             'blocked_extensions': self.blocked_extensions,

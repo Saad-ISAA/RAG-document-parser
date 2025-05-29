@@ -1,7 +1,6 @@
-# Universal Document Parser - Requirements
-# Core dependencies for high-performance document parsing
+# Universal Document Parser - Enhanced
 
-# File type detection
+# Core dependencies for high-performance document parsing
 python-magic>=0.4.27
 python-magic-bin>=0.4.14; sys_platform == "win32"
 
@@ -10,10 +9,14 @@ pdfplumber>=0.10.3              # Best for tables and structured content
 PyMuPDF>=1.23.8                 # Fast, handles images well
 pypdf>=3.17.0                   # Lightweight fallback
 
-# Document processing
+# Document processing - Enhanced
 python-docx>=1.1.0              # DOCX files
 odfpy>=1.4.1                    # ODT files
 striprtf>=0.0.26                # RTF files
+mammoth>=1.6.0                  # Better DOC file parsing
+
+# PowerPoint processing - NEW
+python-pptx>=0.6.22             # PowerPoint PPTX files
 
 # Spreadsheet processing
 pandas>=2.1.4                   # Excel and CSV (recommended)
@@ -24,10 +27,14 @@ xlrd>=2.0.1                     # XLS files (legacy)
 Pillow>=10.1.0                  # Image handling
 numpy>=1.24.3                   # Array processing
 
-# OCR engines (install at least one if OCR needed)
-easyocr>=1.7.0                  # Multi-language OCR (recommended)
+# OCR engines - Enhanced for Arabic/English
+easyocr>=1.7.0                  # Multi-language OCR (recommended for Arabic)
 pytesseract>=0.3.10             # Tesseract wrapper
-opencv-python>=4.8.0            # Image preprocessing (optional)
+opencv-python>=4.8.0            # Image preprocessing
+
+# Arabic text processing - for Regional requirements
+arabic-reshaper>=3.0.0          # Arabic text reshaping
+python-bidi>=0.4.2              # Bidirectional text algorithm
 
 # Text processing
 beautifulsoup4>=4.12.2          # HTML parsing
@@ -41,13 +48,44 @@ chardet>=5.2.0                  # Character encoding detection
 tqdm>=4.66.1                    # Progress bars
 psutil>=5.9.6                   # System monitoring
 
-# Development and testing (optional)
+# Document conversion support - NEW
+# For Windows Office automation (optional)
+pywin32>=306; sys_platform == "win32"
+
+# FastAPI for REST API
+fastapi>=0.104.1                # Web API framework
+uvicorn>=0.24.0                 # ASGI server
+python-multipart>=0.0.6        # File upload support
+
+# Development and testing (optional but recommended)
 pytest>=7.4.3
 black>=23.11.0
 flake8>=6.1.0
 mypy>=1.7.1
 
-# Additional format support (optional)
-# mammoth>=1.6.0                # DOC files (better than basic parsing)
-# python-pptx>=0.6.22           # PowerPoint files
-# python-magic-bin>=0.4.14      # For Windows users
+# Additional format support for comprehensive parsing
+python-magic>=0.4.27            # Better file type detection
+mimetypes-extensions>=1.0       # Extended MIME type support
+
+# Logging and monitoring
+structlog>=23.2.0               # Structured logging (optional)
+
+# Configuration management
+pydantic>=2.5.0                 # Data validation
+python-dotenv>=1.0.0            # Environment variable loading
+
+# NOTE: For optimal Arabic OCR support, also install system dependencies:
+# Ubuntu/Debian: 
+#   sudo apt-get install tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
+#   sudo apt-get install libreoffice  # For document conversion
+#
+# macOS:
+#   brew install tesseract tesseract-lang
+#   brew install libreoffice
+#
+# Windows:
+#   Download Tesseract from: https://github.com/UB-Mannheim/tesseract/wiki
+#   Download LibreOffice from: https://www.libreoffice.org/download/
+#
+# For best performance with Arabic text:
+#   Install fonts: sudo apt-get install fonts-noto-color-emoji fonts-noto-cjk
